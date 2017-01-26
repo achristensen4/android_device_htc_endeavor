@@ -97,7 +97,7 @@ on fs
 # mount mtd partitions
     # Mount /system rw first to give the filesystem a chance to save a checkpoint
     mount yaffs2 mtd@system /system
-    mount yaffs2 mtd@system /system ro remount
+    mount yaffs2 mtd@system /system rw remount
     mount yaffs2 mtd@userdata /data nosuid nodev
     mount yaffs2 mtd@cache /cache nosuid nodev
 
@@ -191,7 +191,7 @@ on post-fs-data
     # must uncomment this line, otherwise encrypted filesystems
     # won't work.
     # Set indication (checked by vold) that we have finished this action
-    #setprop vold.post_fs_data_done 1
+    setprop vold.post_fs_data_done 1
 
     chown system system /sys/class/android_usb/android0/f_mass_storage/lun/file
     chmod 0660 /sys/class/android_usb/android0/f_mass_storage/lun/file
@@ -405,7 +405,6 @@ service ueventd /sbin/ueventd
 service console /system/bin/sh
     class core
     console
-    disabled
     user shell
     group log
 
@@ -415,7 +414,6 @@ on property:ro.debuggable=1
 # adbd is controlled via property triggers in init.<platform>.usb.rc
 service adbd /sbin/adbd
     class core
-    disabled
 
 # adbd on at boot in emulator
 on property:ro.kernel.qemu=1
@@ -446,7 +444,6 @@ service servicemanager /system/bin/servicemanager
 service vold /system/bin/vold
     class core
     socket vold stream 0660 root mount
-    ioprio be 2
 
 service netd /system/bin/netd
     class main
@@ -460,8 +457,7 @@ service gsm0710mux /system/bin/gsm0710muxd -s /dev/ttyACM0 -v 5 -n 8 -m basic
     class core
     user radio
     group radio cache inet misc
-#    oneshot
-    disabled
+    oneshot
 
 service nvm-server /system/bin/nvm_server
     class core
@@ -498,7 +494,6 @@ service surfaceflinger /system/bin/surfaceflinger
 
 service hdmid /system/bin/hdmid
     socket displayd stream 0660 root system graphics
-    disabled
 
 on property:ro.hdmi.enable=true
     start hdmid
@@ -520,20 +515,17 @@ service media /system/bin/mediaserver
     class main
     user media
     group system audio camera inet net_bt net_bt_admin net_bw_acct drmrpc oma_drm_group cw_access
-    ioprio rt 4
 
-#service fusermount /system/bin/fusermount -u /data/htcfs
-#    disabled
-#    oneshot
+service fusermount /system/bin/fusermount -u /data/htcfs
+oneshot
 
-#service htcfs /system/bin/htcfs /data/htcfs -f -o allow_other
-#    onrestart restart fusermount
+service htcfs /system/bin/htcfs /data/htcfs -f -o allow_other
+onrestart restart fusermount
 
 service bootanim /system/bin/bootanimation
     class main
     user graphics
     group system audio graphics cw_access
-    disabled
     oneshot
 
 service dbus /system/bin/dbus-daemon --system --nofork
@@ -549,7 +541,6 @@ service bluetoothd /system/bin/logwrapper /system/bin/bluetoothd -n -d
     # init.rc does not yet support applying capabilities, so run as root and
     # let bluetoothd drop uid to bluetooth with the right linux capabilities
     group bluetooth net_bt_admin misc
-    disabled
 
 service bluetoothd_one /system/bin/bluetoothd -n
     class main
@@ -558,7 +549,6 @@ service bluetoothd_one /system/bin/bluetoothd -n
     # init.rc does not yet support applying capabilities, so run as root and
     # let bluetoothd drop uid to bluetooth with the right linux capabilities
     group bluetooth net_bt_admin misc
-    disabled
     oneshot
 
 service installd /system/bin/installd
@@ -570,7 +560,6 @@ service racoon /system/bin/racoon
     socket racoon stream 600 system system
     # IKE uses UDP port 500. Racoon will setuid to vpn after binding the port.
     group vpn net_admin inet
-    disabled
     oneshot
 
 service mtpd /system/bin/mtpd
@@ -578,7 +567,6 @@ service mtpd /system/bin/mtpd
     socket mtpd stream 600 system system
     user vpn
     group vpn net_admin inet net_raw
-    disabled
     oneshot
 
 service keystore /system/bin/keystore /data/misc/keystore
@@ -590,31 +578,26 @@ service keystore /system/bin/keystore /data/misc/keystore
 service dumpstate /system/bin/dumpstate -s
     class main
     socket dumpstate stream 0660 shell log
-    disabled
     oneshot
 
 service shutdown /system/bin/shutdown
     user root
     group root
-    disabled
     oneshot
 
 service charging /system/bin/charging
     user root
     group root
-    disabled
     oneshot
 
 service netHDencode /system/bin/netHDencode wlan0 3655
     user root
     group root
-    disabled
     oneshot
 
 service L2PE /system/bin/l2_profile_exchange handset wlan1
     user root
     group root
-    disabled
     oneshot
 
 service memlock /system/bin/memlock
